@@ -79,6 +79,30 @@ install( TARGETS ${MULE_UTILITIES_LIB}
     ARCHIVE DESTINATION ${MULE_INSTALL_LIBRARY_DIR}
 )
 
+if (MULE_BUILD_DOCUMENTATION)
+    find_package(Doxygen)
+
+    if (DOXYGEN_FOUND)
+        set(DOXYGEN_INPUT_DIRS
+            ${MULE_INCLUDE_DIR}
+        )
+        set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
+        string(REPLACE ";" " " DOXYGEN_INPUT "${DOXYGEN_INPUT_DIRS}")
+
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+        file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+        add_custom_target( docs
+            ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs
+            COMMENT "Generating Mule Utilities API documentation"
+        )
+    else()
+        message(FATAL_ERROR "Doxygen is required to build documentation")
+    endif()
+endif()
+
+
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
@@ -101,31 +125,3 @@ install(
     DESTINATION ${MULE_INSTALL_LIBRARY_DIR}
     COMPONENT mule_headers
 )
-
-# Needed?
-#if (UNIX)
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-#endif()
-
-if (MULE_BUILD_DOCUMENTATION)
-    find_package(Doxygen)
-
-    if (DOXYGEN_FOUND)
-        set(DOXYGEN_INPUT_DIRS
-            ${MULE_UTILITIES_INCLUDE_DIRS}
-        )
-        set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
-        string(REPLACE ";" " " DOXYGEN_INPUT "${DOXYGEN_INPUT_DIRS}")
-
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-        file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
-        add_custom_target( docs
-            ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs
-            COMMENT "Generating Mule Utilities API documentation"
-        )
-    else()
-        message(FATAL_ERROR "Doxygen is required to build documentation")
-    endif()
-endif()

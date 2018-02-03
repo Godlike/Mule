@@ -31,7 +31,7 @@ endif()
 
 add_subdirectory(MuleUtilities)
 
-if (${MULE_BUILD_TESTS})
+if (MULE_BUILD_TESTS)
     enable_testing()
     include(CTest)
     set(CATCH_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/third_party/Catch2)

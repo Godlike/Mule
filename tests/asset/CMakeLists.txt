@@ -17,8 +17,7 @@ set(AdditionalCatchParameters
 
 add_executable(SimpleStorageTest SimpleStorageTest.cpp)
 target_link_libraries(SimpleStorageTest ${MULE_UTILITIES_LIB})
-ParseAndAddCatchTests(SimpleStorageTest
-)
+ParseAndAddCatchTests(SimpleStorageTest)
 
 add_executable(StorageTest StorageTest.cpp)
 target_link_libraries(StorageTest ${MULE_UTILITIES_LIB} ${CMAKE_THREAD_LIBS_INIT})
