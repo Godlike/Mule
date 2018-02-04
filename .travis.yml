@@ -48,11 +48,9 @@ matrix:
         - ubuntu-toolchain-r-test
         - llvm-toolchain-precise-3.9
         packages:
-        - libc++-dev
         - clang-3.9
-    env:
-    - COMPILER=clang++-3.9
-    - COMPILER_FLAGS=-stdlib=libc++
+        - g++-6
+    env: COMPILER=clang++-3.9
 
 git:
   submodules: false
