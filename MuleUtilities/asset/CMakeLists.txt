@@ -41,6 +41,14 @@ add_library(asset OBJECT
     ${ASSET_SOURCES}
 )
 
+set_target_properties(
+    asset
+
+    PROPERTIES
+
+    FOLDER "${TARGET_FOLDER_ROOT}"
+)
+
 include(MuleInstallInfo)
 
 install(

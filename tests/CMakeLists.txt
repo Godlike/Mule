@@ -10,4 +10,6 @@ include(ParseAndAddCatchTests)
 
 include_directories(${MULE_INCLUDE_DIR} ${CATCH_ROOT}/single_include)
 
+set(TARGET_FOLDER_ROOT "${TARGET_FOLDER_ROOT}/tests")
+
 add_subdirectory(asset)

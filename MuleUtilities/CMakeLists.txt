@@ -39,6 +39,8 @@ install(
             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
 )
 
+set(TARGET_FOLDER_ROOT "${TARGET_FOLDER_ROOT}/utilities")
+
 add_subdirectory(asset)
 add_subdirectory(concurrent)
 add_subdirectory(templates)
