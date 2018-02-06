@@ -63,7 +63,6 @@ install(
         PATTERN "utility/asset/FileReader.hpp" EXCLUDE
 )
 
-# Needed?
-#if (UNIX)
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-#endif()
+if (UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif()
