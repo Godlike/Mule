@@ -8,13 +8,16 @@ if(NOT DEFINED MULE_ROOT)
     set(MULE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Mule root directory.")
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "${MULE_ROOT}/Mule/cmake")
+list(APPEND CMAKE_MODULE_PATH "${MULE_ROOT}/MuleUtilities/cmake")
+
+include(SpdlogConfig)
 
 set(MULE_INCLUDE_DIR
     ${MULE_ROOT}/MuleUtilities/include
     ${MULE_ROOT}/MuleUtilities/asset/include
     ${MULE_ROOT}/MuleUtilities/concurrent/include
     ${MULE_ROOT}/MuleUtilities/templates/include
+    ${SPDLOG_INCLUDE_DIR}
     CACHE LIST "Mule include directories."
 )
 

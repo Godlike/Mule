@@ -39,6 +39,19 @@ install(
             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
 )
 
+## spdlog
+include(SpdlogConfig)
+include_directories(SYSTEM ${SPDLOG_INCLUDE_DIR})
+
+install(
+    DIRECTORY ${SPDLOG_INCLUDE_DIR}
+    DESTINATION ${MULE_INSTALL_INCLUDE_DIR}
+    COMPONENT mule_headers
+    FILES_MATCHING
+        PATTERN "*.h"
+            PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
+)
+
 set(TARGET_FOLDER_ROOT "${TARGET_FOLDER_ROOT}/utilities")
 
 add_subdirectory(asset)
