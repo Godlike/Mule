@@ -7,14 +7,10 @@
 #ifndef MULE_LOGGER_HPP
 #define MULE_LOGGER_HPP
 
-#include <tuple>
-
-#define LOG_ERROR(...) (void)(std::make_tuple(__VA_ARGS__))
-#define LOG_WARNING(...) (void)(std::make_tuple(__VA_ARGS__))
-#define LOG_INFO(...) (void)(std::make_tuple(__VA_ARGS__))
-#define LOG_DEBUG(...) (void)(std::make_tuple(__VA_ARGS__))
-
 #include <spdlog/logger.h>
+
+#include <initializer_list>
+#include <memory>
 
 namespace mule
 {
@@ -24,27 +20,108 @@ namespace LogLevel = spdlog::level;
 class Logger
 {
 public:
+    using Impl = spdlog::logger;
     using SinkPtr = spdlog::sink_ptr;
 
-    Logger(const std::string& name, std::initializer_list<SinkPtr> sinks);
+    Logger(std::string const& name, std::initializer_list<SinkPtr> sinks)
+        : m_logger(name, sinks) {}
 
-    void SetLevel(LogLevel::level_enum lvl);
+    template<class It>
+        Logger(std::string const& name, It const& begin, It const& end)
+        : m_logger(name, begin, end) {}
 
     template <typename... Args>
-        inline void log(LogLevel::level_enum lvl, const char* fmt, const Args&... args)
+        inline void Log(LogLevel::level_enum lvl, char const* fmt, Args const&... args)
     {
         m_logger.log(lvl, fmt, args...);
     }
 
     template <typename... Args>
-        inline void log(LogLevel::level_enum lvl, const char* msg)
+        inline void Log(LogLevel::level_enum lvl, char const* msg)
     {
         m_logger.log(lvl, msg);
     }
 
+    template <typename... Args>
+        inline void Trace(const char* fmt, Args const&... args)
+    {
+        Log(LogLevel::trace, fmt, args...);
+    }
+
+    template <typename... Args>
+        inline void Trace(const char* fmt)
+    {
+        Log(LogLevel::trace, fmt);
+    }
+
+    template <typename... Args>
+        inline void Debug(const char* fmt, Args const&... args)
+    {
+        Log(LogLevel::debug, fmt, args...);
+    }
+
+    template <typename... Args>
+        inline void Debug(const char* fmt)
+    {
+        Log(LogLevel::debug, fmt);
+    }
+
+    template <typename... Args>
+        inline void Info(const char* fmt, Args const&... args)
+    {
+        Log(LogLevel::info, fmt, args...);
+    }
+
+    template <typename... Args>
+        inline void Info(const char* fmt)
+    {
+        Log(LogLevel::info, fmt);
+    }
+
+    template <typename... Args>
+        inline void Warning(const char* fmt, Args const&... args)
+    {
+        Log(LogLevel::warn, fmt, args...);
+    }
+
+    template <typename... Args>
+        inline void Warning(const char* fmt)
+    {
+        Log(LogLevel::warn, fmt);
+    }
+
+    template <typename... Args>
+        inline void Error(const char* fmt, Args const&... args)
+    {
+        Log(LogLevel::err, fmt, args...);
+    }
+
+    template <typename... Args>
+        inline void Error(const char* fmt)
+    {
+        Log(LogLevel::err, fmt);
+    }
+
+    template <typename... Args>
+        inline void Critical(const char* fmt, Args const&... args)
+    {
+        Log(LogLevel::critical, fmt, args...);
+    }
+
+    template <typename... Args>
+        inline void Critical(const char* fmt)
+    {
+        Log(LogLevel::critical, fmt);
+    }
+
+    void SetLevel(LogLevel::level_enum level) { m_logger.set_level(level); }
+    void SetPattern(std::string const& pattern = std::string("%+")) { m_logger.set_pattern(pattern, spdlog::pattern_time_type::utc); }
+
 private:
-    spdlog::logger m_logger;
+    Impl m_logger;
 };
+
+using LoggerPtr = std::shared_ptr<Logger>;
 
 }
 
