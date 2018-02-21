@@ -1,7 +1,12 @@
 #define CATCH_CONFIG_MAIN
 
+#include <mule/Loggers.hpp>
+#include <mule/MuleUtilities.hpp>
+
 #include <mule/asset/Content.hpp>
 #include <mule/asset/Storage.hpp>
+
+#include <spdlog/sinks/stdout_sinks.h>
 
 #include <catch.hpp>
 
@@ -10,8 +15,24 @@ static std::string const testFile1("derp.txt");
 static std::string const testFile2("derpiness.txt");
 static std::string const testFile3("herp.txt");
 
+void Setup()
+{
+    mule::Loggers::Instance().SetDefaultSettings(
+        mule::Loggers::Settings{
+            std::string()
+            , std::string("%+")
+            , mule::LogLevel::trace
+            , { std::make_shared<spdlog::sinks::stdout_sink_st>() }
+        }
+    );
+
+    mule::MuleUtilities::Initialize();
+}
+
 TEST_CASE("Content check", "[basic]")
 {
+    Setup();
+
     mule::asset::Storage& storage = mule::asset::Storage::Instance();
 
     mule::asset::Handler handler1 = storage.Get(testFile1);
@@ -32,6 +53,8 @@ TEST_CASE("Content check", "[basic]")
 
 TEST_CASE("Creating sync handlers", "[sync]")
 {
+    Setup();
+
     mule::asset::Storage& storage = mule::asset::Storage::Instance();
 
     SECTION("handlers to the same file")
@@ -55,6 +78,8 @@ TEST_CASE("Creating sync handlers", "[sync]")
 
 TEST_CASE("Creating async handlers", "[async]")
 {
+    Setup();
+
     mule::asset::Storage& storage = mule::asset::Storage::Instance();
 
     storage.InitializeWorkers(1);
@@ -80,6 +105,8 @@ TEST_CASE("Creating async handlers", "[async]")
 
 TEST_CASE("Mixed handlers", "[sync][async]")
 {
+    Setup();
+
     mule::asset::Storage& storage = mule::asset::Storage::Instance();
 
     storage.InitializeWorkers(1);

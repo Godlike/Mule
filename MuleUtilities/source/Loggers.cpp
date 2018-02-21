@@ -19,10 +19,10 @@ std::array<LoggerPtr, Log::size> g_loggers;
 namespace
 {
 
-static std::array<char const*, Log::size> s_logger_names = {
+static std::array<char const*, Log::size> s_logger_names = {{
     "mule"
     , "mule_storage"
-};
+}};
 
 }
 

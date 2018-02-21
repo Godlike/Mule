@@ -13,6 +13,7 @@
 namespace mule
 {
 
+/** @brief  Public interface to internal mule logging categories */
 class Loggers
     : public LoggerConfigBase
     , public templates::Singleton<Loggers>
@@ -20,6 +21,10 @@ class Loggers
 public:
     using Settings = LoggerConfigBase::Settings;
 
+    /** @brief  Returns a vector of internal logging category names
+     *
+     *  @note   vector indices correspond to logging category indices
+     */
     std::vector<std::string> GetDefaultLoggerNames() const;
 
 private:

@@ -17,9 +17,11 @@
 namespace mule
 {
 
+/** @brief  Mule library entry point */
 class MuleUtilities
 {
 public:
+    /** @brief  Initializes internal subsystems */
     static void Initialize();
 
 };
