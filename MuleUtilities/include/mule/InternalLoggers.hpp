@@ -27,4 +27,7 @@ extern std::array<mule::LoggerPtr, Log::size> g_loggers;
 
 }
 
+#define LOG ::mule::g_loggers[::mule::Log::mule]
+#define LOG_STORAGE ::mule::g_loggers[::mule::Log::mule_storage]
+
 #endif // MULE_INTERNAL_LOGGERS_HPP

@@ -22,13 +22,13 @@ Handler SimpleStorage::Get(const KeyType& key)
 
     if (m_entries.cend() != it)
     {
-        g_loggers[Log::mule_storage]->Debug("Requested asset \"{}\" -> exists", key.c_str());
+        LOG_STORAGE->Debug("Requested asset \"{}\" -> exists", key.c_str());
 
         return it->second;
     }
     else
     {
-        g_loggers[Log::mule_storage]->Debug("Requested asset \"{}\" -> process", key.c_str());
+        LOG_STORAGE->Debug("Requested asset \"{}\" -> process", key.c_str());
 
         return ProcessHandlerCreation(key);
     }
@@ -36,11 +36,11 @@ Handler SimpleStorage::Get(const KeyType& key)
 
 Handler SimpleStorage::ProcessHandlerCreation(const KeyType& key)
 {
-    g_loggers[Log::mule_storage]->Debug("Processing asset \"{}\" -> creating handler", key.c_str());
+    LOG_STORAGE->Debug("Processing asset \"{}\" -> creating handler", key.c_str());
 
     Handler handler = CreateHandler(key);
 
-    g_loggers[Log::mule_storage]->Debug("Processing asset \"{}\" -> publishing entry", key.c_str());
+    LOG_STORAGE->Debug("Processing asset \"{}\" -> publishing entry", key.c_str());
 
     m_entries.insert(std::make_pair(key, handler));
 
@@ -51,7 +51,7 @@ Handler SimpleStorage::CreateHandler(const KeyType& key)
 {
     Content* content = nullptr;
 
-    g_loggers[Log::mule_storage]->Debug("Reading file \"{}\"", key.c_str());
+    LOG_STORAGE->Debug("Reading file \"{}\"", key.c_str());
 
     FileReader file(key.c_str());
 
@@ -61,7 +61,7 @@ Handler SimpleStorage::CreateHandler(const KeyType& key)
     }
     else
     {
-        g_loggers[Log::mule_storage]->Warning("Failed to read file \"{}\"", key.c_str());
+        LOG_STORAGE->Warning("Failed to read file \"{}\"", key.c_str());
     }
 
     return Handler(key, content);

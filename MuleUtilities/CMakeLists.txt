@@ -71,7 +71,6 @@ set(MULE_UTILITIES_HEADERS
 )
 
 set(MULE_UTILITIES_SOURCES
-    source/Logger.cpp
     source/LoggerConfigBase.cpp
     source/Loggers.cpp
 

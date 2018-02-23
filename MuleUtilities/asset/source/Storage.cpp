@@ -25,7 +25,7 @@ void Storage::InitializeWorkers(uint16_t count)
         StopWorkers();
     }
 
-    g_loggers[Log::mule_storage]->Info("Initializing {} workers", count);
+    LOG_STORAGE->Info("Initializing {} workers", count);
 
     m_workers.reserve(count);
 
@@ -41,13 +41,13 @@ Handler Storage::Get(const KeyType& key)
 
     if (entry.second && std::future_status::ready == entry.first->second.wait_for(std::chrono::nanoseconds(0)))
     {
-        g_loggers[Log::mule_storage]->Debug("Requested sync task \"{}\" -> exists", key.c_str());
+        LOG_STORAGE->Debug("Requested sync task \"{}\" -> exists", key.c_str());
 
         return entry.first->second.get();
     }
     else
     {
-        g_loggers[Log::mule_storage]->Debug("Requested sync task \"{}\" -> process", key.c_str());
+        LOG_STORAGE->Debug("Requested sync task \"{}\" -> process", key.c_str());
 
         return ProcessHandlerCreation(key);
     }
@@ -59,13 +59,13 @@ std::shared_future<Handler> Storage::GetAsync(const KeyType& key, uint32_t prior
 
     if (entry.second)
     {
-        g_loggers[Log::mule_storage]->Debug("Requested async task \"{}\"[{}] -> exists", key.c_str(), priority);
+        LOG_STORAGE->Debug("Requested async task \"{}\"[{}] -> exists", key.c_str(), priority);
 
         return entry.first->second;
     }
     else
     {
-        g_loggers[Log::mule_storage]->Debug("Requested async task \"{}\"[{}] -> process", key.c_str(), priority);
+        LOG_STORAGE->Debug("Requested async task \"{}\"[{}] -> process", key.c_str(), priority);
 
         return ProcessAsyncHandlerCreation(key, priority);
     }
@@ -75,7 +75,7 @@ void Storage::StopWorkers()
 {
     if (!m_workers.empty())
     {
-        g_loggers[Log::mule_storage]->Info("Stopping all worker threads");
+        LOG_STORAGE->Info("Stopping all worker threads");
 
         {
             std::lock_guard<MutexType> lock(m_ordersMutex);
@@ -84,7 +84,7 @@ void Storage::StopWorkers()
 
         m_ordersCV.notify_all();
 
-        g_loggers[Log::mule_storage]->Info("Joining threads");
+        LOG_STORAGE->Info("Joining threads");
 
         for (std::vector<std::thread>::iterator it = m_workers.begin(); it != m_workers.end(); ++it)
         {
@@ -108,7 +108,7 @@ Handler Storage::ProcessHandlerCreation(const KeyType& key)
 
         if (requestFlag.second)
         {
-            g_loggers[Log::mule_storage]->Debug("Processing sync task \"{}\" -> creating entry", key.c_str());
+            LOG_STORAGE->Debug("Processing sync task \"{}\" -> creating entry", key.c_str());
 
             m_entries.insert(std::make_pair(key, promise.get_future().share()));
         }
@@ -116,11 +116,11 @@ Handler Storage::ProcessHandlerCreation(const KeyType& key)
 
     if (requestFlag.second)
     {
-        g_loggers[Log::mule_storage]->Debug("Processing sync task \"{}\" -> creating handler", key.c_str());
+        LOG_STORAGE->Debug("Processing sync task \"{}\" -> creating handler", key.c_str());
 
         Handler handler = CreateHandler(key);
 
-        g_loggers[Log::mule_storage]->Debug("Processing sync task \"{}\" -> publishing handler to entry", key.c_str());
+        LOG_STORAGE->Debug("Processing sync task \"{}\" -> publishing handler to entry", key.c_str());
 
         promise.set_value(handler);
 
@@ -142,12 +142,12 @@ Handler Storage::ProcessHandlerCreation(const KeyType& key)
         {
             std::shared_future<Handler> result = m_entries.at(key);
 
-            g_loggers[Log::mule_storage]->Debug("Processing sync task \"{}\" -> snatched async task \"{}\"[{}] -> creating handler", key.c_str(), task.key.c_str(), task.priority);
+            LOG_STORAGE->Debug("Processing sync task \"{}\" -> snatched async task \"{}\"[{}] -> creating handler", key.c_str(), task.key.c_str(), task.priority);
 
             //! Since we snatched it, we should also set the promise value
             Handler handler = CreateHandler(task.key);
 
-            g_loggers[Log::mule_storage]->Debug("Processing sync task \"{}\" -> publishing handler to entry", key.c_str());
+            LOG_STORAGE->Debug("Processing sync task \"{}\" -> publishing handler to entry", key.c_str());
 
             task.promise.set_value(handler);
 
@@ -155,7 +155,7 @@ Handler Storage::ProcessHandlerCreation(const KeyType& key)
         }
         else
         {
-            g_loggers[Log::mule_storage]->Debug("Processing sync task \"{}\" -> waiting for async task finish", task.key.c_str());
+            LOG_STORAGE->Debug("Processing sync task \"{}\" -> waiting for async task finish", task.key.c_str());
 
             //! We couldn't snatch it, so we should wait on the future
             return m_entries.at(key).get();
@@ -175,7 +175,7 @@ std::shared_future<Handler> Storage::ProcessAsyncHandlerCreation(const KeyType& 
 
         if (requestFlag.second)
         {
-            g_loggers[Log::mule_storage]->Debug("Processing async task \"{}\"[{}] -> creating entry", key.c_str(), priority);
+            LOG_STORAGE->Debug("Processing async task \"{}\"[{}] -> creating entry", key.c_str(), priority);
 
             result = promise.get_future().share();
             m_entries.insert(std::make_pair(key, result));
@@ -189,7 +189,7 @@ std::shared_future<Handler> Storage::ProcessAsyncHandlerCreation(const KeyType& 
         task.priority = priority;
         task.promise = std::move(promise);
 
-        g_loggers[Log::mule_storage]->Debug("Processing async task \"{}\"[{}] -> pushing order", task.key.c_str(), priority);
+        LOG_STORAGE->Debug("Processing async task \"{}\"[{}] -> pushing order", task.key.c_str(), priority);
 
         {
             std::lock_guard<MutexType> lock(m_ordersMutex);
@@ -200,7 +200,7 @@ std::shared_future<Handler> Storage::ProcessAsyncHandlerCreation(const KeyType& 
     }
     else
     {
-        g_loggers[Log::mule_storage]->Debug("Processing async task \"{}\"[{}] -> already requested; updating priority and reusing entry", key.c_str(), priority);
+        LOG_STORAGE->Debug("Processing async task \"{}\"[{}] -> already requested; updating priority and reusing entry", key.c_str(), priority);
 
         {
             std::lock_guard<MutexType> lock(m_ordersMutex);
@@ -217,7 +217,7 @@ Handler Storage::CreateHandler(const KeyType& key)
 {
     Content* content = nullptr;
 
-    g_loggers[Log::mule_storage]->Debug("Reading file \"{}\"", key.c_str());
+    LOG_STORAGE->Debug("Reading file \"{}\"", key.c_str());
 
     FileReader file(key.c_str());
 
@@ -227,7 +227,7 @@ Handler Storage::CreateHandler(const KeyType& key)
     }
     else
     {
-        g_loggers[Log::mule_storage]->Warning("Failed to read file \"{}\"", key.c_str());
+        LOG_STORAGE->Warning("Failed to read file \"{}\"", key.c_str());
     }
 
     return Handler(key, content);
@@ -309,7 +309,7 @@ void Storage::TaskQueue::UpdatePriority(const KeyType& key, uint32_t priority)
 
 void Storage::WorkerThread()
 {
-    g_loggers[Log::mule_storage]->Info("Storage::WorkerThread spawned");
+    LOG_STORAGE->Info("Storage::WorkerThread spawned");
 
     std::unique_lock<MutexType> lock(m_ordersMutex, std::defer_lock);
 
@@ -320,7 +320,7 @@ void Storage::WorkerThread()
 
         if (m_workersStopFlag)
         {
-            g_loggers[Log::mule_storage]->Info("Storage::WorkerThread stop signal received");
+            LOG_STORAGE->Info("Storage::WorkerThread stop signal received");
             lock.unlock();
             break;
         }
@@ -328,11 +328,11 @@ void Storage::WorkerThread()
         Task task = m_orders.PopTop();
         lock.unlock();
 
-        g_loggers[Log::mule_storage]->Debug("Async task \"{}\"[{}] -> processing", task.key.c_str(), task.priority);
+        LOG_STORAGE->Debug("Async task \"{}\"[{}] -> processing", task.key.c_str(), task.priority);
 
         Handler handler = CreateHandler(task.key);
 
-        g_loggers[Log::mule_storage]->Debug("Async task \"{}\"[{}] -> publishing handler to entry", task.key.c_str(), task.priority);
+        LOG_STORAGE->Debug("Async task \"{}\"[{}] -> publishing handler to entry", task.key.c_str(), task.priority);
 
         task.promise.set_value(handler);
     }
