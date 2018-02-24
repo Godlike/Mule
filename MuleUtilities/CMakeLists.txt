@@ -37,6 +37,22 @@ install(
             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
         PATTERN "*.imp"
             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
+        PATTERN "InternalLoggers.hpp" EXCLUDE
+)
+
+## spdlog
+include(SpdlogConfig)
+include_directories(SYSTEM ${SPDLOG_INCLUDE_DIR})
+
+install(
+    DIRECTORY ${SPDLOG_INCLUDE_DIR}/
+    DESTINATION ${MULE_INSTALL_INCLUDE_DIR}
+    COMPONENT mule_headers
+    FILES_MATCHING
+        PATTERN "*.cc"
+            PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
+        PATTERN "*.h"
+            PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
 )
 
 set(TARGET_FOLDER_ROOT "${TARGET_FOLDER_ROOT}/utilities")
@@ -44,6 +60,22 @@ set(TARGET_FOLDER_ROOT "${TARGET_FOLDER_ROOT}/utilities")
 add_subdirectory(asset)
 add_subdirectory(concurrent)
 add_subdirectory(templates)
+
+set(MULE_UTILITIES_HEADERS
+    include/mule/InternalLoggers.hpp
+    include/mule/Logger.hpp
+    include/mule/LoggerConfigBase.hpp
+    include/mule/Loggers.hpp
+
+    include/mule/MuleUtilities.hpp
+)
+
+set(MULE_UTILITIES_SOURCES
+    source/LoggerConfigBase.cpp
+    source/Loggers.cpp
+
+    source/MuleUtilities.cpp
+)
 
 set(MULE_UTILITIES_EXTRA)
 
@@ -62,6 +94,10 @@ if (MSVC)
 endif()
 
 add_library(${MULE_UTILITIES_LIB}
+
+    ${MULE_UTILITIES_HEADERS}
+    ${MULE_UTILITIES_SOURCES}
+
     ${MULE_UTILITIES_EXTRA}
 
     $<TARGET_OBJECTS:asset>

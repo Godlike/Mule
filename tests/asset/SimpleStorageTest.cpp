@@ -1,5 +1,8 @@
 #define CATCH_CONFIG_MAIN
 
+#include <mule/Loggers.hpp>
+#include <mule/MuleUtilities.hpp>
+
 #include <mule/asset/Content.hpp>
 #include <mule/asset/SimpleStorage.hpp>
 
@@ -9,8 +12,24 @@
 static std::string const testFile1("derp.txt");
 static std::string const testFile2("herp.txt");
 
+void Setup()
+{
+    mule::Loggers::Instance().SetDefaultSettings(
+        mule::Loggers::Settings{
+            std::string()
+            , std::string("%+")
+            , mule::LogLevel::trace
+            , { std::make_shared<spdlog::sinks::stdout_sink_st>() }
+        }
+    );
+
+    mule::MuleUtilities::Initialize();
+}
+
 TEST_CASE("Content check", "[basic]")
 {
+    Setup();
+
     mule::asset::SimpleStorage& storage = mule::asset::SimpleStorage::Instance();
 
     mule::asset::Handler handler1 = storage.Get(testFile1);
@@ -27,6 +46,8 @@ TEST_CASE("Content check", "[basic]")
 
 TEST_CASE("Creating handlers", "[sync]")
 {
+    Setup();
+
     mule::asset::SimpleStorage& storage = mule::asset::SimpleStorage::Instance();
 
     SECTION("handlers to the same file")
