@@ -8,6 +8,7 @@
 #define MULE_LOGGER_HPP
 
 #include <spdlog/logger.h>
+#include <spdlog/fmt/ostr.h>
 
 #include <initializer_list>
 #include <memory>
