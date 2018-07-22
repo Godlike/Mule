@@ -6,10 +6,12 @@ cmake_minimum_required(VERSION 3.4)
 
 project(Mule)
 
+set(CMAKE_CXX_STANDARD 14)
+
 option(MULE_BUILD_DOCUMENTATION "Build Mule documentation" OFF)
 option(MULE_BUILD_TESTS "Build Mule tests" ON)
 
-message(STATUS "${PROJECT_NAME} configuration:")
+message(STATUS "${PROJECT_NAME} ${CMAKE_BUILD_TYPE} configuration:")
 message(STATUS "-- MULE_BUILD_DOCUMENTATION: ${MULE_BUILD_DOCUMENTATION}")
 message(STATUS "-- MULE_BUILD_TESTS: ${MULE_BUILD_TESTS}")
 
@@ -19,6 +21,10 @@ include(MuleUtilitiesConfig)
 
 #Build flags
 if (UNIX)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-command-line-argument")
+    endif()
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s -O3")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -ggdb3 -O0")
