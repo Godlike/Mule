@@ -5,9 +5,16 @@
 cmake_minimum_required(VERSION 3.4)
 cmake_policy(VERSION 3.4)
 
-project(${MULE_UTILITIES_NAME})
+project(MuleUtilities)
 
-set(CMAKE_CXX_STANDARD 14)
+set(MULE_LIB_ALIAS Mule::Utilities)
+
+add_library(${PROJECT_NAME} "")
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library(${MULE_LIB_ALIAS} ALIAS ${PROJECT_NAME})
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -43,6 +50,8 @@ install(
             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
         PATTERN "InternalLoggers.hpp" EXCLUDE
 )
+
+find_package(Threads)
 
 ## spdlog
 include(SpdlogConfig)
@@ -97,15 +106,27 @@ if (MSVC)
     )
 endif()
 
-add_library(${MULE_UTILITIES_LIB}
+target_sources(${PROJECT_NAME}
+    PRIVATE
+        ${MULE_UTILITIES_HEADERS}
+        ${MULE_UTILITIES_SOURCES}
 
-    ${MULE_UTILITIES_HEADERS}
-    ${MULE_UTILITIES_SOURCES}
+        ${MULE_UTILITIES_EXTRA}
 
-    ${MULE_UTILITIES_EXTRA}
-
-    $<TARGET_OBJECTS:asset>
+        $<TARGET_OBJECTS:asset>
 )
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        ${MULE_INCLUDE_DIR}
+)
+
+if (Threads_FOUND)
+    target_link_libraries(${PROJECT_NAME}
+        PUBLIC
+            ${CMAKE_THREAD_LIBS_INIT}
+    )
+endif()
 
 set_target_properties(
     ${MULE_UTILITIES_LIB}
@@ -148,22 +169,27 @@ endif()
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/MuleUtilitiesConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
     VERSION ${MULE_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/MuleUtilitiesConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/MuleUtilitiesConfig.cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.gen
 
     @ONLY
 )
 
+file(GENERATE
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    INPUT ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.gen
+)
+
 install(
     FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/MuleUtilitiesConfig.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/MuleUtilitiesConfigVersion.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
     DESTINATION ${MULE_INSTALL_LIBRARY_DIR}
     COMPONENT mule_headers
 )
